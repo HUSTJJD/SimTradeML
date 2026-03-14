@@ -1,123 +1,124 @@
 # SimTradeML
 
-**PTrade 兼容的量化交易 ML 框架**，帮助用户快速训练出可在 SimTradeLab 和 Ptrade 中使用的预测模型。
+**PTrade-compatible quantitative trading ML framework** - helps users quickly train prediction models for use in SimTradeLab and PTrade.
 
-## 核心定位
+## Core Positioning
 
-SimTradeML 是 [SimTradeLab](https://github.com/kay-ou/SimTradeLab) 的 **机器学习工具链**：
-- 🎯 **专为 PTrade 优化**：训练产出的模型可直接在 SimTradeLab 回测, Ptrade 实盘使用
-- ⚡ **快速训练**：5分钟从数据到可用模型
-- 📊 **量化金融指标**：IC/ICIR/分位收益等专业评估
-- 🔧 **A 股生态集成**：深度绑定 SimTradeLab 数据源
+SimTradeML is the **machine learning toolchain** for [SimTradeLab](https://github.com/kay-ou/SimTradeLab):
+- 🎯 **Optimized for PTrade**: Trained models can be used directly in SimTradeLab backtesting and PTrade live trading
+- ⚡ **Fast Training**: From data to usable model in 5 minutes
+- 📊 **Quantitative Finance Metrics**: Professional evaluation with IC/ICIR/quantile returns
+- 🔧 **A-share Ecosystem Integration**: Deep integration with SimTradeLab data sources
 
-## 快速开始
+## Quick Start
 
-### 安装
+### Installation
 
 ```bash
 cd /path/to/SimTradeML
 poetry install
-pip install simtradelab  # 如果需要使用 SimTradeLab 数据源
+pip install simtradelab  # If you need to use SimTradeLab data source
 ```
 
-### 5分钟训练第一个模型
+### Train Your First Model in 5 Minutes
 
 ```bash
-# 1. 准备数据（复制 SimTradeData 的 parquet 数据到 data/ 目录）
+# 1. Prepare data (copy SimTradeLab h5 files to data/ directory)
 mkdir -p data
-cp -r /path/to/SimTradeData/data/* data/
+cp /path/to/ptrade_data.h5 data/
+cp /path/to/ptrade_fundamentals.h5 data/
 
-# 2. 运行完整训练流程
+# 2. Run complete training pipeline
 poetry run python examples/mvp_train.py
 ```
 
-### 完整示例
+### Complete Examples
 
-参考 `examples/` 目录：
-- **mvp_train.py** - 完整训练流程（数据收集、训练、导出）
-- **complete_example.py** - 推荐用法演示（单文件包）
+See `examples/` directory:
+- **mvp_train.py** - Complete training pipeline (data collection, training, export)
+- **complete_example.py** - Recommended usage demonstration (single-file package)
 
-### 推荐用法（单文件包）
+### Recommended Usage (Single-File Package)
 
 ```python
 from simtrademl.core.models import PTradeModelPackage
 
-# 训练后保存（一个文件包含所有）
+# Save after training (one file contains everything)
 package = PTradeModelPackage(model=model, scaler=scaler, metadata=metadata)
 package.save('my_model.ptp')
 
-# PTrade 中加载和预测
+# Load and predict in PTrade
 package = PTradeModelPackage.load('my_model.ptp')
-prediction = package.predict(features_dict)  # 自动验证+缩放
+prediction = package.predict(features_dict)  # Auto validation + scaling
 ```
 
-## 核心特性
+## Core Features
 
-### PTrade 兼容性
-- ✅ **XGBoost 0.90**：PTrade 支持的版本
-- ✅ **灵活保存格式**：支持 JSON、Pickle、XGBoost 原生格式
-- ✅ **即插即用**：训练的模型可直接在 SimTradeLab 中使用
+### PTrade Compatibility
+- ✅ **XGBoost 0.90**: PTrade supported version
+- ✅ **Flexible Save Formats**: Supports JSON, Pickle, XGBoost native formats
+- ✅ **Plug and Play**: Trained models can be used directly in SimTradeLab
 
-### ML 能力
-- **数据源抽象**：轻松切换不同数据源
-- **特征工程**：内置技术指标，支持自定义
-- **评估指标**：IC/ICIR/分位收益/方向准确率
-- **并行处理**：自动多进程采样加速
+### ML Capabilities
+- **Data Source Abstraction**: Easily switch between different data sources
+- **Feature Engineering**: Built-in technical indicators, supports custom features
+- **Evaluation Metrics**: IC/ICIR/quantile returns/directional accuracy
+- **Parallel Processing**: Automatic multi-process sampling acceleration
 
-### 量化金融特化
-- **时间序列严谨性**：防止未来数据泄露
-- **日度再平衡**：模拟真实交易场景
-- **分位数收益**：策略收益模拟
-- **方向准确率**：涨跌判断评估
+### Quantitative Finance Specialization
+- **Time Series Rigor**: Prevents future data leakage
+- **Daily Rebalancing**: Simulates real trading scenarios
+- **Quantile Returns**: Strategy return simulation
+- **Directional Accuracy**: Up/down judgment evaluation
 
-## 项目结构
+## Project Structure
 
 ```
 src/simtrademl/
 ├── core/
-│   ├── data/          # 数据层（DataSource, DataCollector）
-│   └── utils/         # 工具（Config, Logger, Metrics）
-└── data_sources/      # 数据源实现
+│   ├── data/          # Data layer (DataSource, DataCollector)
+│   └── utils/         # Utilities (Config, Logger, Metrics)
+└── data_sources/      # Data source implementations
     └── simtradelab_source.py
 
 examples/
-└── mvp_train.py       # 完整训练示例
+└── mvp_train.py       # Complete training example
 ```
 
-## API 文档
+## API Documentation
 
-### 配置管理
+### Configuration Management
 
 ```python
 from simtrademl import Config
 
-# 从字典创建
+# Create from dictionary
 config = Config.from_dict({'data': {'lookback_days': 60}})
 
-# 从 YAML 加载
+# Load from YAML
 config = Config.from_yaml('config.yml')
 
-# 点号访问
+# Dot notation access
 lookback = config.get('data.lookback_days', default=30)
 config.set('model.type', 'xgboost')
 ```
 
-### 数据收集
+### Data Collection
 
 ```python
 from simtrademl.core.data.collector import DataCollector
 
 collector = DataCollector(data_source, config)
 
-# 收集所有股票
+# Collect all stocks
 X, y, dates = collector.collect()
 
-# 过滤股票
+# Filter stocks
 X, y, dates = collector.collect(
     stock_filter=lambda s: s.startswith('60')
 )
 
-# 自定义特征
+# Custom features
 def custom_features(stock, price_df, idx, date, ds):
     return {'my_feature': price_df['close'].iloc[idx-1]}
 
@@ -125,7 +126,7 @@ collector = DataCollector(data_source, config,
                           feature_calculator=custom_features)
 ```
 
-### 评估指标
+### Evaluation Metrics
 
 ```python
 from simtrademl import (
@@ -133,34 +134,34 @@ from simtrademl import (
     calculate_quantile_returns, calculate_direction_accuracy
 )
 
-# IC 指标
+# IC metrics
 ic, p_value = calculate_ic(predictions, actuals)
 rank_ic, p_value = calculate_rank_ic(predictions, actuals)
 icir, ic_std = calculate_icir(predictions, actuals)
 
-# 分位收益（日度再平衡）
+# Quantile returns (daily rebalancing)
 quantile_returns, long_short = calculate_quantile_returns(
     predictions, actuals, dates=sample_dates
 )
 
-# 方向准确率
+# Directional accuracy
 accuracy = calculate_direction_accuracy(predictions, actuals)
 ```
 
-## 测试
+## Testing
 
 ```bash
-# 运行所有测试
+# Run all tests
 poetry run pytest
 
-# 查看覆盖率
+# View coverage
 poetry run pytest --cov=simtrademl --cov-report=html
 open htmlcov/index.html
 ```
 
-## 配置示例
+## Configuration Example
 
-完整配置（`config.yml`）:
+Complete configuration (`config.yml`):
 
 ```yaml
 data:
@@ -179,10 +180,10 @@ model:
 training:
   train_ratio: 0.70
   val_ratio: 0.15
-  parallel_jobs: -1  # -1 = 使用所有 CPU
+  parallel_jobs: -1  # -1 = use all CPUs
 ```
 
-## 扩展数据源
+## Extending Data Sources
 
 ```python
 from simtrademl.core.data.base import DataSource
@@ -192,93 +193,93 @@ class MyDataSource(DataSource):
         return ['600519.SS', '000858.SZ']
 
     def get_price_data(self, stock, start_date, end_date, fields):
-        # 返回 DataFrame，index 为日期
+        # Return DataFrame, index is date
         return pd.DataFrame({
             'open': [...], 'high': [...], 'low': [...],
             'close': [...], 'volume': [...]
         })
 
-    # 实现其他必需方法...
+    # Implement other required methods...
 ```
 
-## 依赖
+## Dependencies
 
-**核心**: Python 3.9+, numpy, pandas, scikit-learn, **xgboost 0.90** (PTrade 兼容版本)
-**可选**: simtradelab (数据), optuna (超参优化), mlflow (实验追踪)
+**Core**: Python 3.9+, numpy, pandas, scikit-learn, **xgboost 0.90** (PTrade compatible version)
+**Optional**: simtradelab (data), optuna (hyperparameter optimization), mlflow (experiment tracking)
 
-> ⚠️ **重要**：XGBoost 版本锁定在 0.90 以确保 PTrade 兼容性，请勿升级。
+> ⚠️ **Important**: XGBoost version is locked at 0.90 to ensure PTrade compatibility. Do not upgrade.
 
-## PTrade 集成说明
+## PTrade Integration Guide
 
-### 模型导出格式
-PTrade 支持多种模型保存格式，只要兼容库可读即可：
+### Model Export Formats
+PTrade supports multiple model save formats as long as compatible libraries can read them:
 
 ```python
 import xgboost as xgb
 
 model = xgb.train(params, dtrain, ...)
 
-# 方式1: JSON 格式（推荐，人类可读）
+# Method 1: JSON format (recommended, human-readable)
 model.save_model('my_model.json')
 
-# 方式2: XGBoost 原生格式
+# Method 2: XGBoost native format
 model.save_model('my_model.model')
 
-# 方式3: Pickle 格式（通用）
+# Method 3: Pickle format (universal)
 import pickle
 with open('my_model.pkl', 'wb') as f:
     pickle.dump(model, f)
 ```
 
-### 在 SimTradeLab 中使用
+### Using in SimTradeLab
 ```python
-# 方式1: 加载 JSON/Model 格式
+# Method 1: Load JSON/Model format
 import xgboost as xgb
 model = xgb.Booster(model_file='my_model.json')
 
-# 方式2: 加载 Pickle 格式
+# Method 2: Load Pickle format
 import pickle
 with open('my_model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-# 预测
+# Predict
 features = [...]
 dmatrix = xgb.DMatrix([features])
 prediction = model.predict(dmatrix)[0]
 ```
 
-### 特征一致性
-确保训练和推理时使用相同的特征顺序：
+### Feature Consistency
+Ensure the same feature order is used during training and inference:
 ```python
-# 训练时记录特征顺序
+# Record feature order during training
 feature_names = ['ma5', 'ma10', 'rsi14', ...]
 
-# 推理时按相同顺序构造特征
-features = [ma5, ma10, rsi14, ...]  # 顺序必须一致
+# Construct features in same order during inference
+features = [ma5, ma10, rsi14, ...]  # Order must be consistent
 ```
 
-## 开发计划
+## Development Roadmap
 
-### 当前版本 (v0.2.0) - MVP ✅
-- [x] SimTradeLab 数据源集成
-- [x] XGBoost 0.90 训练流程
-- [x] 量化金融评估指标
-- [x] 并行数据收集
+### Current Version (v0.2.0) - MVP ✅
+- [x] SimTradeLab data source integration
+- [x] XGBoost 0.90 training pipeline
+- [x] Quantitative finance evaluation metrics
+- [x] Parallel data collection
 
-### 下一阶段 (v0.3.0) - PTrade 增强 🚧
-- [ ] **模型元数据系统** (P0) - 特征一致性保证
-- [ ] **统一模型导出器** (P0) - 一键生成 PTrade 模型包
-- [ ] **特征注册表** (P0) - 特征复用和版本管理
-- [ ] **快速训练管道** (P1) - 简化训练流程
+### Next Phase (v0.3.0) - PTrade Enhancement 🚧
+- [ ] **Model Metadata System** (P0) - Feature consistency guarantee
+- [ ] **Unified Model Exporter** (P0) - One-click PTrade model package generation
+- [ ] **Feature Registry** (P0) - Feature reuse and version management
+- [ ] **Fast Training Pipeline** (P1) - Simplify training workflow
 
-详见 [TODO.md](TODO.md)
+See [TODO.md](TODO.md) for details
 
-## 许可证
+## License
 
 MIT License
 
 ---
 
-**文档**: 参考 `examples/mvp_train.py` 获取完整示例
-**问题**: 提交 Issue 到 GitHub
-**测试覆盖率**: 88% | 66 个测试全部通过
+**Documentation**: See `examples/mvp_train.py` for complete examples
+**Issues**: Submit issues to GitHub
+**Test Coverage**: 88% | All 66 tests passed
