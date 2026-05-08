@@ -17,7 +17,7 @@ scipy = ">=1.8.0"
 pyyaml = "^6.0"
 tqdm = "^4.60.0"
 xgboost = [
-    { version = "0.80", platform = "windows" },
+    { version = ">=0.80", platform = "windows" },
     { version = ">=0.80", platform = "darwin", markers = "platform_machine == 'arm64'"},
 ]
 scikit-learn = ">=1.0.0"
